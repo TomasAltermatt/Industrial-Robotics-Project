@@ -47,7 +47,8 @@ motor.V = [4; 4; 4; 4];
 % 
 % Q = [q1; q2; q3; q4];
 
-[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROlines_parabolas(Q, n_joints, motor);
+% [joint_positions, joint_velocities, joint_accelerations, time_vect] = PROlines_parabolas(Q, n_joints, motor);
+[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROcubic_splines(Q, n_joints, motor);
 
 
 run = 1;

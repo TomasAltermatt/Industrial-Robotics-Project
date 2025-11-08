@@ -1,8 +1,5 @@
 function [joint_positions, joint_velocities, joint_accelerations, time_vect] = PROlines_parabolas(Q, n_joints, motor)
-    % Missing velocity/acceleration as well
-   
-    % Adapt based on desired Workspace Positions, not arbitrarily
-    % Each q represents a joint, each entry represents a position
+
     n_pos = length(Q(1,:));
     dQ = zeros(n_joints, n_pos-1);
     for i = 1:n_joints
@@ -135,7 +132,6 @@ function [joint_positions, joint_velocities, joint_accelerations, time_vect] = P
             end
         end
     end
-
 
 end
 
