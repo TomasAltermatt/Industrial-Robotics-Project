@@ -43,22 +43,23 @@ Fse(15) = F_rob(3);
 n_joints = 4;
 Q_seq = [];
 % End Effector Position (Initial & Final)
-S1 = [0; 30e-2; 5e-2; -pi/4];
-S2 = [0; 35e-2; 5e-2; -pi/4];
-S3 = [0; 40e-2; 5e-2; -pi/4];
-S4 = [0; 45e-2; 5e-2; -pi/4];
-S5 = [0; 50e-2; 5e-2; -pi/4];
-S6 = [0; 55e-2; 5e-2; -pi/4];
-S7 = [0; 60e-2; 5e-2; 0];
-S8 = [0; 59e-2; 7.5e-2; 0];
-S9 = [0; 58e-2; 10e-2; -pi/6];
-S10 = [0; 59e-2; 12.5e-2; -pi/3];
-S11 = [0; 60e-2; 15e-2; -pi/3];
-% seq = [S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11];
-seq = [S1, S4, S7, S9, S11];
+S1 = [0; 30e-2; 5e-2; -pi/6];
+S2 = [0; 35e-2; 5e-2; -pi/6];
+S3 = [0; 40e-2; 5e-2; -pi/6];
+S4 = [0; 45e-2; 5e-2; -pi/6];
+S5 = [0; 50e-2; 5e-2; -pi/6];
+S6 = [0; 55e-2; 5e-2; -pi/6];
+S7 = [0; 57.5e-2; 5e-2; -pi/6];
+S8 = [0; 60e-2; 5e-2; -pi/6];
+S9 = [0; 58e-2; 7.5e-2; -pi/6];
+S10 = [0; 56e-2; 10e-2; -pi/6];
+S11 = [0; 58e-2; 12.5e-2; -pi/3];
+S12 = [0; 60e-2; 15e-2; -pi/3];
+seq = [S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12];
+% seq = [S1, S4, S7, S9, S11];
 
 for i=1:length(seq(1,:))
-    Q_seq(:,i) = PROinv2(seq(:,i), L, 1);
+    Q_seq(:,i) = PROinv2(seq(:,i), L, -1);
 end
 
 motor.A = [3; 3; 3; 3];
@@ -97,7 +98,7 @@ colors1 = lines(n_joints);
 for j = 1:n_joints
     figure;
     grid on
-    plot(time_vect(j,:), Fq(j,:),'Color', colors1(j,:), ...
+    plot(time_vect, Fq(j,:),'Color', colors1(j,:), ...
         'DisplayName', sprintf('$q_{%d}$', j), LineWidth=1.5);
     title(sprintf('Joint %d Torques', j));
     ylabel(sprintf('$C_{%d} [N/m]$', j), Interpreter='latex')

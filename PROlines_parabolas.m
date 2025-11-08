@@ -83,8 +83,10 @@ function [joint_positions, joint_velocities, joint_accelerations, time_vect] = P
     
     ap = diff(q_dot_ext, [], 2)./(2*t_j);
     ap(isnan(ap)) = 0;
+    
     bp = [q_dot, zeros(n_joints, 1)] - ap*2.*t_vec(:, 2:2:end);
     bp(isnan(bp)) = 0;
+    
     cp = (Q_end_parabola - ap.*t_vec(:, 2:2:end).^2 - bp.*t_vec(:, 2:2:end));
     cp(:,end) = Q(:,end)- ap(:,end).*t_vec(:,end).^2 - bp(:,end).*t_vec(:,end);
     cp(isnan(cp)) = 0;
@@ -96,43 +98,44 @@ function [joint_positions, joint_velocities, joint_accelerations, time_vect] = P
     
     % Calculate joint positions over time using the coefficients
     
-    num_el = 50;
-    joint_positions = []; % Initialize joint_positions to store the trajectory
-    joint_velocities = [];
-    joint_accelerations = [];
-    time_vect = [];
-    % odd indexes for parabolas (1-2, 3-4, 5-6)
-    % even indexes for lines (2-3, 4-5, 6-7)
-    for i = 1:2*n_pairs+1
+    step = 1e-4;
+    time_vect = 0:step:max(t_vec(:));
+    joint_positions = zeros(n_joints, length(time_vect)); % Initialize joint_positions to store the trajectory
+    joint_velocities = zeros(n_joints, length(time_vect));
+    joint_accelerations = zeros(n_joints, length(time_vect));
     
-        start = t_vec(:,i);
-        finish = t_vec(:,i+1);
-        dt_plot = start + (finish - start) .* linspace(0, 1, num_el);
-        joint_pos_segment = zeros(n_joints, num_el);
-        joint_vel_segment = zeros(n_joints, num_el);
-        joint_acc_segment = zeros(n_joints, num_el);
-        
-        for j = 1:length(dt_plot)
-            % lines
-            if mod(i, 2) == 0
-                idx = i/2;
-                joint_pos_segment(:, j) = al(:, idx).*dt_plot(:,j) + bl(:, idx);
-                joint_vel_segment(:, j) = al(:, idx);
-                joint_acc_segment(:, j) = zeros(n_joints, 1);
-    
-            % parabolas
-            else
-                idx = (i+1)/2;
-                joint_pos_segment(:, j) = ap(:, idx).*(dt_plot(:,j).^2) + bp(:, idx).*dt_plot(:,j) ...
-                    +cp(:, idx);
-                joint_vel_segment(:, j) = 2*ap(:, idx).*dt_plot(:,j) + bp(:, idx);
-                joint_acc_segment(:, j) = 2*ap(:, idx);
+    for n = 1:n_joints
+        t_vec_joint = t_vec(n,:);
+        for i = 1:2*n_pairs + 1
+            start = t_vec_joint(i);
+            finish = t_vec_joint(i+1);
+            for j = 1:length(time_vect)
+                t = time_vect(j);
+                
+                % If i'm not in the interval i go next iteration
+                if t < start || t > finish
+                    continue
+                end
+
+                % line case
+                if mod(i, 2) == 0
+                    idx = i/2;
+                    joint_positions(n, j) = al(n, idx).*t + bl(n, idx);
+                    joint_velocities(n, j)= al(n, idx);
+                    joint_accelerations(n, j) = 0;
+
+                % parabola case
+                else
+                    idx = (i+1)/2;
+                    joint_positions(n, j) = ap(n, idx).*(t^2) + bp(n, idx).*t ...
+                        +cp(n, idx);
+                    joint_velocities(n, j) = 2*ap(n, idx).*t + bp(n, idx);
+                    joint_accelerations(n, j) = 2*ap(n, idx);
+                end                
             end
         end
-        joint_positions = [joint_positions, joint_pos_segment];
-        joint_velocities = [joint_velocities, joint_vel_segment];
-        joint_accelerations = [joint_accelerations, joint_acc_segment];
-        time_vect = [time_vect, dt_plot];
     end
 
+
 end
+

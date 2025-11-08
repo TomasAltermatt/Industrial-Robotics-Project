@@ -9,19 +9,19 @@ Q = [];
 
 
 % End Effector Position (Initial & Final)
-S1 = [0; 30e-2; 5e-2; -pi/4];
-S2 = [0; 35e-2; 5e-2; -pi/4];
-S3 = [0; 40e-2; 5e-2; -pi/4];
-S4 = [0; 45e-2; 5e-2; -pi/4];
-S5 = [0; 50e-2; 5e-2; -pi/4];
-S6 = [0; 55e-2; 5e-2; -pi/4];
-S7 = [0; 60e-2; 5e-2; 0];
-S8 = [0; 59e-2; 7.5e-2; 0];
-S9 = [0; 58e-2; 10e-2; -pi/6];
-S10 = [0; 59e-2; 12.5e-2; -pi/3];
-S11 = [0; 60e-2; 15e-2; -pi/3];
-% seq = [S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11];
-seq = [S1, S4, S7, S9, S11];
+S1 = [0; 30e-2; 5e-2; -pi/6];
+S2 = [0; 35e-2; 5e-2; -pi/6];
+S3 = [0; 40e-2; 5e-2; -pi/6];
+S4 = [0; 45e-2; 5e-2; -pi/6];
+S5 = [0; 50e-2; 5e-2; -pi/6];
+S6 = [0; 55e-2; 5e-2; -pi/6];
+S7 = [0; 57.5e-2; 5e-2; -pi/6];
+S8 = [0; 60e-2; 5e-2; -pi/6];
+S9 = [0; 58e-2; 7.5e-2; -pi/6];
+S10 = [0; 56e-2; 10e-2; -pi/6];
+S11 = [0; 58e-2; 12.5e-2; -pi/3];
+S12 = [0; 60e-2; 15e-2; -pi/3];
+seq = [S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12];
 
 
 % Length of the links
@@ -64,7 +64,7 @@ while run == 1
     
     % position
     % subplot(3, n_joints, i);
-    plot(time_vect(i,:), joint_positions(i,:),'Color', colors1(i,:), ...
+    plot(time_vect, joint_positions(i,:),'Color', colors1(i,:), ...
         'DisplayName', sprintf('$q_{%d}$', i), LineWidth=1.5);
     title(sprintf('Joint %d Position', i));
     xlabel('t [s]', Interpreter='latex')
@@ -74,7 +74,7 @@ while run == 1
     grid on;
     % velocity
     % subplot(3, n_joints, i+4);
-    plot(time_vect(i,:), joint_velocities(i,:),'Color', colors1(i,:), ...
+    plot(time_vect, joint_velocities(i,:),'Color', colors1(i,:), ...
         'DisplayName', sprintf('$q_{%d}$', i), LineWidth=1.5);
     title(sprintf('Joint %d Velocity', i));
     xlabel('t [s]', Interpreter='latex')
@@ -84,7 +84,7 @@ while run == 1
     grid on;
     % acceleration
     % subplot(3, n_joints, i+8);
-    plot(time_vect(i,:), joint_accelerations(i,:),'Color', colors1(i,:), ...
+    plot(time_vect, joint_accelerations(i,:),'Color', colors1(i,:), ...
         'DisplayName', sprintf('$q_{%d}$', i), LineWidth=1.5);
     title(sprintf('Joint %d Acceleration', i));
     xlabel('t [s]', Interpreter='latex')
@@ -107,7 +107,7 @@ if show_all == 1
         hold on
         grid on;
         subplot(n_joints, 1, j)
-        plot(time_vect(j,:), joint_positions(j,:),'Color', colors1(j,:), ...
+        plot(time_vect, joint_positions(j,:),'Color', colors1(j,:), ...
             'DisplayName', sprintf('$q_{%d}$', j), LineWidth=1.5);
         title(sprintf('Joint %d Position', j));
         xlabel('t [s]', Interpreter='latex')
@@ -117,7 +117,7 @@ if show_all == 1
         hold on
         grid on;
         subplot(n_joints, 1, j)
-        plot(time_vect(j,:), joint_velocities(j,:),'Color', colors1(j,:), ...
+        plot(time_vect, joint_velocities(j,:),'Color', colors1(j,:), ...
             'DisplayName', sprintf('$q_{%d}$', j), LineWidth=1.5);
         title(sprintf('Joint %d Velocity', j));
         xlabel('t [s]', Interpreter='latex')
@@ -128,7 +128,7 @@ if show_all == 1
         hold on
         grid on;
         subplot(n_joints, 1, j)
-        plot(time_vect(j,:), joint_accelerations(j,:),'Color', colors1(j,:), ...
+        plot(time_vect, joint_accelerations(j,:),'Color', colors1(j,:), ...
             'DisplayName', sprintf('$q_{%d}$', j), LineWidth=1.5);
         title(sprintf('Joint %d Acceleration', j));
         xlabel('t [s]', Interpreter='latex')

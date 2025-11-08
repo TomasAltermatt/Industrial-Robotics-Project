@@ -2,51 +2,92 @@
 % Base Cyilinder
 Rb = 10e-2;
 Lb = 20e-2;
-Ib = [1, 1, 1];
+Ib = [1, 1, 1];  % Inertia Moment
+Ibp = [0, 0, 0]; % Inertia Product
+Ib_tot = inertia_matrix(Ib, Ibp);
 
 % Link 1 arm
 a1 = 50e-2;
-d1 = 10e-2;
+d1 = 5e-2;
 w1 = 5e-2;
 m1 = 5;
-I1 = [1, 1, 1];
+I1 = [1, 1, 1];  % Inertia Moment
+I1p = [0, 0, 0]; % Inertia Product
+% Calculate the inertia matrix for Link 1
+I1_tot = inertia_matrix(I1, I1p);
 
 % Link 2 arm
 a2 = a1/1.4;
-d2 = 10e-2;
-w2 = 5e-2;
+d2 = 4e-2;
+w2 = 4e-2;
 m2 = 5;
-I2 = [1, 1, 1];
+I2 = [1, 1, 1];  % Inertia Moment
+I2p = [0, 0, 0]; % Inertia Product
+% Calculate the inertia matrix for Link 2
+I2_tot = inertia_matrix(I2, I2p);
 
 % Link 3 arm
 a3 = a2/1.4;
-d3 = 10e-2;
-w3 = 5e-2;
+d3 = 3e-2;
+w3 = 3e-2;
 m3 = 5;
-I3 = [1, 1, 1];
+I3 = [1, 1, 1];  % Inertia Moment
+I3p = [0, 0, 0]; % Inertia Product
+% Calculate the inertia matrix for Link 3
+I3_tot = inertia_matrix(I3, I3p);
+
+% Save 3 inertia tensors
+J_rob = zeros(3, 3, 4);
+J_rob(:,:,1) = I1_tot;
+J_rob(:,:,2) = I2_tot;
+J_rob(:,:,3) = I3_tot;
+J_rob(:,:,4) = Ib_tot;
+
+
+% Robot mass/forces
+m_rob = [m1, m2, m3];
+F_rob = -9.81*m_rob;
+
+% Payload
+m_pl = 0.5;
+Ipl = [1, 1, 1];
+Iplp = [0, 0, 0];
+J_pl = inertia_matrix(Ipl, Iplp);
+fz = -9.81*m_pl;
+
+% Mass Matrix
+M=mass_matrix(m_pl, J_pl, J_rob, m_rob);
+
+% External forces
+Fse=zeros(16,1);
+Fse(3) = fz;
+Fse(7) = F_rob(1);
+Fse(11) = F_rob(2);
+Fse(15) = F_rob(3);
+
 
 %% Planning Motion curve
 n_joints = 4;
 Q_seq = [];
 % End Effector Position (Initial & Final)
-S1 = [0; 30e-2; 5e-2; -pi/4];
-S2 = [0; 35e-2; 5e-2; -pi/4];
-S3 = [0; 40e-2; 5e-2; -pi/4];
-S4 = [0; 45e-2; 5e-2; -pi/4];
-S5 = [0; 50e-2; 5e-2; -pi/4];
-S6 = [0; 55e-2; 5e-2; -pi/4];
-S7 = [0; 60e-2; 5e-2; 0];
-S8 = [0; 59e-2; 7.5e-2; 0];
-S9 = [0; 58e-2; 10e-2; -pi/6];
-S10 = [0; 59e-2; 12.5e-2; -pi/3];
-S11 = [0; 60e-2; 15e-2; -pi/3];
-% seq = [S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11];
-seq = [S1, S4, S7, S9, S11];
+S1 = [0; 30e-2; 5e-2; -pi/6];
+S2 = [0; 35e-2; 5e-2; -pi/6];
+S3 = [0; 40e-2; 5e-2; -pi/6];
+S4 = [0; 45e-2; 5e-2; -pi/6];
+S5 = [0; 50e-2; 5e-2; -pi/6];
+S6 = [0; 55e-2; 5e-2; -pi/6];
+S7 = [0; 57.5e-2; 5e-2; -pi/6];
+S8 = [0; 60e-2; 5e-2; -pi/6];
+S9 = [0; 58e-2; 7.5e-2; -pi/6];
+S10 = [0; 56e-2; 10e-2; -pi/6];
+S11 = [0; 58e-2; 12.5e-2; -pi/3];
+S12 = [0; 60e-2; 15e-2; -pi/3];
+seq = [S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12];
 
 L = [a1, a2, a3];
 
 for i=1:length(seq(1,:))
-    Q_seq(:,i) = PROinv2(seq(:,i), L, 1);
+    Q_seq(:,i) = PROinv2(seq(:,i), L, -1);
 end
 
 motor.A = [3; 3; 3; 3];
@@ -54,23 +95,24 @@ motor.D = [3; 3; 3; 3];
 motor.V = [4; 4; 4; 4];
 
 [joint_positions, joint_velocities, joint_accelerations, time_vect] = PROlines_parabolas(Q_seq, n_joints, motor);
+
+
 % 1. Create the Time-Series Object for Position
-q_ts_j1 = timeseries(joint_positions(1,:), time_vect(1,:), 'Name', 'Joint1Position');
-q_ts_j2 = timeseries(joint_positions(2,:), time_vect(2,:), 'Name', 'Joint2Position');
-q_ts_j3 = timeseries(joint_positions(3,:), time_vect(3,:), 'Name', 'Joint3Position');
-q_ts_j4 = timeseries(joint_positions(4,:), time_vect(4,:), 'Name', 'Joint4Position');
+q_ts_j1 = timeseries(joint_positions(1,:), time_vect, 'Name', 'Joint1Position');
+q_ts_j2 = timeseries(joint_positions(2,:), time_vect, 'Name', 'Joint2Position');
+q_ts_j3 = timeseries(joint_positions(3,:), time_vect, 'Name', 'Joint3Position');
+q_ts_j4 = timeseries(joint_positions(4,:), time_vect, 'Name', 'Joint4Position');
 
 % 2. Create the Time-Series Object for Velocity
-q_dot_ts_j1 = timeseries(joint_velocities(1,:), time_vect(1,:), 'Name', 'Joint1Velocity');
-q_dot_ts_j2 = timeseries(joint_velocities(2,:), time_vect(2,:), 'Name', 'Joint2Velocity');
-q_dot_ts_j3 = timeseries(joint_velocities(3,:), time_vect(3,:), 'Name', 'Joint3Velocity');
-q_dot_ts_j4 = timeseries(joint_velocities(4,:), time_vect(4,:), 'Name', 'Joint4Velocity');
+q_dot_ts_j1 = timeseries(joint_velocities(1,:), time_vect, 'Name', 'Joint1Velocity');
+q_dot_ts_j2 = timeseries(joint_velocities(2,:), time_vect, 'Name', 'Joint2Velocity');
+q_dot_ts_j3 = timeseries(joint_velocities(3,:), time_vect, 'Name', 'Joint3Velocity');
+q_dot_ts_j4 = timeseries(joint_velocities(4,:), time_vect, 'Name', 'Joint4Velocity');
 
 
 % 3. Create the Time-Series Object for Acceleration
-q_ddot_ts_j1 = timeseries(joint_accelerations(1,:), time_vect(1,:), 'Name', 'Joint1Acceleration');
-q_ddot_ts_j2 = timeseries(joint_accelerations(2,:), time_vect(2,:), 'Name', 'Joint2Acceleration');
-q_ddot_ts_j3 = timeseries(joint_accelerations(3,:), time_vect(3,:), 'Name', 'Joint3Acceleration');
-q_ddot_ts_j4 = timeseries(joint_accelerations(4,:), time_vect(4,:), 'Name', 'Joint4Acceleration');
+q_ddot_ts_j1 = timeseries(joint_accelerations(1,:), time_vect, 'Name', 'Joint1Acceleration');
+q_ddot_ts_j2 = timeseries(joint_accelerations(2,:), time_vect, 'Name', 'Joint2Acceleration');
+q_ddot_ts_j3 = timeseries(joint_accelerations(3,:), time_vect, 'Name', 'Joint3Acceleration');
+q_ddot_ts_j4 = timeseries(joint_accelerations(4,:), time_vect, 'Name', 'Joint4Acceleration');
 
-% You only need one set of time data (t) for all of them.
