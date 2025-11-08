@@ -67,14 +67,13 @@ while run == 1
     figure;
     grid on;
     hold on
-    plot(t_vect_LP, pos_LP(i,:), ...
+    plot(t_vect_LP, pos_LP(i,:),'Color', colors1(i,:), ...
         'DisplayName', sprintf('Lines and Parabolas'), LineWidth=1.5);
-    plot(t_vect_CS, pos_CS(i,:), ...
+    plot(t_vect_CS, pos_CS(i,:),'Color', colors1(i,:), ...
         'DisplayName', sprintf('Cubic Splines'), LineWidth=1.5);
     title(sprintf('Joint %d Position', i));
     xlabel('t [s]', Interpreter='latex')
     ylabel('q [rad]', Interpreter='latex')
-    legend show
     
     
     % velocity
@@ -82,14 +81,14 @@ while run == 1
     figure;
     grid on;
     hold on;
-    plot(t_vect_LP, vel_LP(i,:),  ...
+    plot(t_vect_LP, vel_LP(i,:),'Color', colors1(i,:), ...
         'DisplayName', sprintf('Lines and Parabolas'), LineWidth=1.5);
-    plot(t_vect_CS, vel_CS(i,:), ...
+    plot(t_vect_CS, vel_CS(i,:),'Color', colors1(i,:), ...
         'DisplayName', sprintf('Cubic Splines'), LineWidth=1.5);
     title(sprintf('Joint %d Velocity', i));
     xlabel('t [s]', Interpreter='latex')
     ylabel('$\dot q$ [rad/s]', Interpreter='latex')
-    legend show
+    
     
     
     % acceleration
@@ -97,15 +96,14 @@ while run == 1
     figure;
     grid on;
     hold on;
-    plot(t_vect_LP, acc_LP(i,:), ...
+    plot(t_vect_LP, acc_LP(i,:),'Color', colors1(i,:), ...
         'DisplayName', sprintf('Lines and Parabolas'), LineWidth=1.5);
-    plot(t_vect_CS, acc_CS(i,:), ...
+    plot(t_vect_CS, acc_CS(i,:),'Color', colors1(i,:), ...
         'DisplayName', sprintf('Cubic Splines'), LineWidth=1.5);
     title(sprintf('Joint %d Acceleration', i));
     xlabel('t [s]', Interpreter='latex')
     ylabel('$\ddot q$ [rad/$s^2$]', Interpreter='latex')
-    legend show
-
+    
     cont = input("Plot other Joints?\n [1] Yes\n [0] No\n");
     if cont == 1
         close all

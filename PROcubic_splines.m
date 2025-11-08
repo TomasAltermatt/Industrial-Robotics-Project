@@ -34,12 +34,17 @@ function [joint_positions, joint_velocities, joint_accelerations, time_vect] = P
     end
 
     %% 3) Build Matrix System of Equations for splines
-    a_joints = zeros(n_joints, n_pos);
-    b_joints = zeros(n_joints, n_pos);
-    c_joints = zeros(n_joints, n_pos);
+    a_joints = zeros(n_joints, n_pos-1);
+    b_joints = zeros(n_joints, n_pos-1);
+    c_joints = zeros(n_joints, n_pos-1);
     d_joints = Q;
     
-    % We need to solve the system of eqs given by 3n-4
+    step = 1e-4;
+    t_vec = cumsum([0, tau_vec(1,:)]);
+    time_vect = t_vec(1):step:t_vec(end);
+    joint_positions = zeros(n_joints, length(time_vect));
+    joint_velocities = zeros(n_joints, length(time_vect));
+    joint_accelerations = zeros(n_joints, length(time_vect));
     
     for i = 1:n_joints
         tau = tau_vec(1, 1);
@@ -61,25 +66,51 @@ function [joint_positions, joint_velocities, joint_accelerations, time_vect] = P
             sol_vec(3*(idx-1) + 1) = Q(i, j) - d_joints(i, j-1);
             
             tau = tau_vec(1, idx);
-            row_end = 3*idx;
-            col_end = 6*idx - 4;
+            row_start = 3*idx - 2;
+            col_start = 3*(idx - 1);
             if idx ~= n_pos - 1
-                A(row_end-2 : row_end, col_end-5:col_end ) =[
+                A(row_start : row_start + 2, col_start:col_start+5 ) =[
                     tau^3,    tau^2, tau, 0,  0,  0;
                     3*tau^2,  2*tau,   1, 0,  0, -1;
                     6*tau  ,      2,   0, 0, -2,  0];
             else
-                A(row_end-2 : row_end - 1, col_end-5:col_end ) =[
-                    tau^3,    tau^2, tau, 0,  0,  0;
-                    3*tau^2,  2*tau,   1, 0,  0, -1];
+                A(row_start:row_start + 1, col_start:end ) =[
+                    tau^3,    tau^2, tau;
+                    3*tau^2,  2*tau,   1];
             end
             
         end
 
         % Solve System
         coeffs = A\sol_vec;
+        coeffs_rem = coeffs(3:end);
+        
+        % Store coeffs
+        a_joints(i, 1) = coeffs(1);
+        b_joints(i, 1) = coeffs(2);
+        c_joints(i, 1) = 0;
 
+        % Store remaining coefficients
+        a_joints(i, 2:end) = coeffs_rem(1:3:end);
+        b_joints(i, 2:end) = coeffs_rem(2:3:end);
+        c_joints(i, 2:end) = coeffs_rem(3:3:end);
+        
+        % Generate trajectory
+        for j = 1:length(t_vec) - 1
+            start = t_vec(j);
+            finish = t_vec(j+1);
 
+            for t_idx = 1:length(time_vect)
+                t = time_vect(t_idx);
+                if t < start || t > finish
+                    continue
+                end
+                dt = t - t_vec(j);
+                joint_positions(i, t_idx) = a_joints(i, j)*dt^3 + b_joints(i, j)*dt^2 + c_joints(i, j)*dt + d_joints(i, j);
+                joint_velocities(i, t_idx) = 3*a_joints(i, j)*dt^2 + 2*b_joints(i, j)*dt + c_joints(i, j);
+                joint_accelerations(i, t_idx) = 6*a_joints(i, j)*dt + 2*b_joints(i, j);
+            end
+        end
 
     end
 

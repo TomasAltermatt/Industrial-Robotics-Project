@@ -94,7 +94,7 @@ motor.A = [3; 3; 3; 3];
 motor.D = [3; 3; 3; 3];
 motor.V = [4; 4; 4; 4];
 
-[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROlines_parabolas(Q_seq, n_joints, motor);
+[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROcubic_splines(Q_seq, n_joints, motor);
 
 
 % 1. Create the Time-Series Object for Position
