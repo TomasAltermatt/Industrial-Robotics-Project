@@ -43,19 +43,24 @@ Fse(15) = F_rob(3);
 n_joints = 4;
 Q_seq = [];
 % End Effector Position (Initial & Final)
+
 S1 = [0; 30e-2; 5e-2; -pi/6];
-S2 = [0; 35e-2; 5e-2; -pi/6];
-S3 = [0; 40e-2; 5e-2; -pi/6];
-S4 = [0; 45e-2; 5e-2; -pi/6];
-S5 = [0; 50e-2; 5e-2; -pi/6];
-S6 = [0; 55e-2; 5e-2; -pi/6];
-S7 = [0; 57.5e-2; 5e-2; -pi/6];
 S8 = [0; 60e-2; 5e-2; -pi/6];
-S9 = [0; 58e-2; 7.5e-2; -pi/6];
-S10 = [0; 56e-2; 10e-2; -pi/6];
-S11 = [0; 58e-2; 12.5e-2; -pi/3];
-S12 = [0; 60e-2; 15e-2; -pi/3];
-seq = [S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12];
+seq = Trajectory_1(0.15, 0.18, 10, S1, S8);
+
+% S1 = [0; 30e-2; 5e-2; -pi/6];
+% S2 = [0; 35e-2; 5e-2; -pi/6];
+% S3 = [0; 40e-2; 5e-2; -pi/6];
+% S4 = [0; 45e-2; 5e-2; -pi/6];
+% S5 = [0; 50e-2; 5e-2; -pi/6];
+% S6 = [0; 55e-2; 5e-2; -pi/6];
+% S7 = [0; 57.5e-2; 5e-2; -pi/6];
+% S8 = [0; 60e-2; 5e-2; -pi/6];
+% S9 = [0; 58e-2; 7.5e-2; -pi/6];
+% S10 = [0; 56e-2; 10e-2; -pi/6];
+% S11 = [0; 58e-2; 12.5e-2; -pi/3];
+% S12 = [0; 60e-2; 15e-2; -pi/3];
+% seq = [S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12];
 % seq = [S1, S4, S7, S9, S11];
 
 for i=1:length(seq(1,:))
@@ -66,10 +71,10 @@ motor.A = [3; 3; 3; 3];
 motor.D = [3; 3; 3; 3];
 motor.V = [4; 4; 4; 4];
 
-[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROcubic_splines(Q_seq, n_joints, motor);
+[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROlines_parabolas(Q_seq, n_joints, motor);
 
 Fq = zeros(n_joints, length(time_vect));
-workspace_pos = zeros(4, length(time_vect));
+S_vec = zeros(4, length(time_vect));
 
 for i = 1:length(time_vect)
     
@@ -78,7 +83,7 @@ for i = 1:length(time_vect)
     Qpp = joint_accelerations(:,i);
     
     % Workspace Positions
-    workspace_pos(:,i) = PROdir(Q, L);
+    S_vec(:,i) = PROdir(Q, L);
     
     % Extended Jacobians
     Je = PROjacdin(Q, L);
@@ -109,7 +114,7 @@ hold off
 
 % Plot Trajectory
 figure;
-plot(workspace_pos(2,:), workspace_pos(3,:));
+plot(S_vec(2,:), S_vec(3,:));
 hold on
 xlabel('y')
 ylabel('z')
@@ -118,24 +123,19 @@ ylabel('z')
 % seq(3,:)
 scatter(seq(2,:),seq(3,:),'red')
 
+% Plot Trajectory: Reference vs Result
+figure;
+hold on; grid on; axis equal; view(3);
 
+% Result trajectory (from forward kinematics)
+plot3(S_vec(1,:), S_vec(2,:), S_vec(3,:), 'b-', 'LineWidth', 2, 'DisplayName', 'Resampled trajectory');
 
-% 
-% %position of the extended 2R(operational space)
-% Sd=SCARAdirdin(Q,L);
-% 
-% %Jacobians matrix and its time derivative
-% J=SCARAjacdin(Q,L);
-% Jp=SCARAjacPdin(Q,Qp,L);
-% 
-% % acceleration of the extended 2R
-% Spp=Jp*Qp+J*Qpp;
-% 
-% %inertial forces
-% Fsi=-M*Spp;
-% 
-% % forces in the operational space
-% Fs=(Fse+Fsi);
-% 
-% % forces in the joint space
-% Fcq=-J'*Fs;
+% Reference trajectory (desired waypoints)
+plot3(seq(1,:), seq(2,:), seq(3,:), 'ro--', 'LineWidth', 1.5, 'MarkerSize', 6, 'DisplayName', 'Reference trajectory');
+
+xlabel('x [m]');
+ylabel('y [m]');
+zlabel('z [m]');
+title('End-Effector Trajectory');
+legend('show');
+

@@ -69,20 +69,25 @@ Fse(15) = F_rob(3);
 %% Planning Motion curve
 n_joints = 4;
 Q_seq = [];
-% End Effector Position (Initial & Final)
-S1 = [0; 30e-2; 5e-2; -pi/6];
-S2 = [0; 35e-2; 5e-2; -pi/6];
-S3 = [0; 40e-2; 5e-2; -pi/6];
-S4 = [0; 45e-2; 5e-2; -pi/6];
-S5 = [0; 50e-2; 5e-2; -pi/6];
-S6 = [0; 55e-2; 5e-2; -pi/6];
-S7 = [0; 57.5e-2; 5e-2; -pi/6];
-S8 = [0; 60e-2; 5e-2; -pi/6];
-S9 = [0; 58e-2; 7.5e-2; -pi/6];
-S10 = [0; 56e-2; 10e-2; -pi/6];
-S11 = [0; 58e-2; 12.5e-2; -pi/3];
-S12 = [0; 60e-2; 15e-2; -pi/3];
-seq = [S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12];
+
+S1 = [0; 20e-2; 5e-2; -pi/6];
+S8 = [0; 50e-2; 5e-2; -pi/6];
+seq = Trajectory_1(0.15, 0.18, 10, S1, S8);
+
+% S1 = [0; 30e-2; 5e-2; -pi/6];
+% S2 = [0; 35e-2; 5e-2; -pi/6];
+% S3 = [0; 40e-2; 5e-2; -pi/6];
+% S4 = [0; 45e-2; 5e-2; -pi/6];
+% S5 = [0; 50e-2; 5e-2; -pi/6];
+% S6 = [0; 55e-2; 5e-2; -pi/6];
+% S7 = [0; 57.5e-2; 5e-2; -pi/6];
+% S8 = [0; 60e-2; 5e-2; -pi/6];
+% S9 = [0; 58e-2; 7.5e-2; -pi/6];
+% S10 = [0; 56e-2; 10e-2; -pi/6];
+% S11 = [0; 58e-2; 12.5e-2; -pi/3];
+% S12 = [0; 60e-2; 15e-2; -pi/3];
+% seq = [S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12];
+% seq = [S1, S4, S7, S9, S11];
 
 L = [a1, a2, a3];
 
@@ -94,7 +99,7 @@ motor.A = [3; 3; 3; 3];
 motor.D = [3; 3; 3; 3];
 motor.V = [4; 4; 4; 4];
 
-[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROcubic_splines(Q_seq, n_joints, motor);
+[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROlines_parabolas(Q_seq, n_joints, motor);
 
 
 % 1. Create the Time-Series Object for Position
