@@ -1,4 +1,5 @@
 clear all; close all; clc;
+addpath('Functions')
 
 %% Parameters
 % robot parameters
@@ -87,7 +88,7 @@ for i = 1:length(time_vect)
     
     % Extended Jacobians
     Je = PROjacdin(Q, L);
-    Jep = PROjacPdin2(Q, Qp, L);
+    Jep = PROjacPdin(Q, Qp, L);
     Spp = Jep*Qp + Je*Qpp;
 
     Fq(:,i) = -Je'*(-M*Spp + Fse);

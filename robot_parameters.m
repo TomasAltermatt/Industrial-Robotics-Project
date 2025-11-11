@@ -1,4 +1,7 @@
 
+
+addpath('Functions')
+
 % Base Cyilinder
 Rb = 10e-2;
 Lb = 20e-2;

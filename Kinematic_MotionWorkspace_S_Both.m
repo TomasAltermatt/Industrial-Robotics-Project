@@ -1,7 +1,7 @@
 clear
 close all
 clc
-
+addpath('Functions')
 %% Kinematics & Motion Profiles in S - Workspace
 
 

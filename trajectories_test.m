@@ -2,6 +2,8 @@ close all
 clear
 clc
 
+addpath('Functions')
+
 %% Data
 
 n_joints = 4;
