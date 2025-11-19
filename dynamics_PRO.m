@@ -5,7 +5,7 @@ addpath('Functions')
 % Base Parameters
 Rb = 10e-2;
 Lb = 20e-2;
-Ib = [1, 1, 1];  % Inertia Moment
+Ib = [1, 1, 1]*10^-6;  % Inertia Moment
 Ibp = [0, 0, 0]; % Inertia Product
 Ib_tot = inertia_matrix(Ib, Ibp);
 
@@ -15,8 +15,8 @@ d1 = 5e-2;          % height
 w1 = 5e-2;          % width
 m1 = 5;             % link mass
 g1 = 0.5* a1;       % center of mass
-I1 = [ 3.8620847e+03,1.7221182e+04,1.9444675e+04];     % Inertia Moment
-I1p = [ -3.2999403e+03 ,  3.5137952e+01 ,  3.2038278e+01];    % Inertia Product
+I1 = [ 3.8620847e+03,1.7221182e+04,1.9444675e+04]*10^-6;     % Inertia Moment
+I1p = [ -3.2999403e+03 ,  3.5137952e+01 ,  3.2038278e+01]*10^-6;    % Inertia Product
 % Calculate the inertia matrix for Link 1
 I1_tot = inertia_matrix(I1, I1p);
 
@@ -26,8 +26,8 @@ d2 = 4e-2;          % height
 w2 = 4e-2;          % width
 m2 = 5;             % link mass
 g2 = 0.5*a2;        % center of mass
-I2 = [3.8666085e+03, 1.7241799e+04,   1.9469790e+04];     % Inertia Moment
-I2p = [-3.3096372e+03, 3.5119295e+01, 3.2029042e+01];    % Inertia Product
+I2 = [3.8666085e+03, 1.7241799e+04,   1.9469790e+04]*10^-6;     % Inertia Moment
+I2p = [-3.3096372e+03, 3.5119295e+01, 3.2029042e+01]*10^-6;    % Inertia Product
 % Calculate the inertia matrix for Link 2
 I2_tot = inertia_matrix(I2, I2p);
 
@@ -37,8 +37,8 @@ d3 = 3e-2;          % height
 w3 = 3e-2;          % width
 m3 = 5;             % link mass
 g3 = 0.5*a3;        % center of mass
-I3 = [5.7807216e+02, 2.8034581e+03, 2.3138400e+03];     % Inertia Moment
-I3p = [0, 0, 0];    % Inertia Product
+I3 = [5.7807216e+02, 2.8034581e+03, 2.3138400e+03]*10^-6;     % Inertia Moment
+I3p = [0, 0, 0]*10^-6;    % Inertia Product
 % Calculate the inertia matrix for Link 3
 I3_tot = inertia_matrix(I3, I3p);
 
@@ -57,7 +57,7 @@ F_rob = -9.81*m_rob;
 
 % Payload
 m_pl = 0.5;
-Ipl = [1, 1, 1];
+Ipl = [0, 0, 0];
 Iplp = [0, 0, 0];
 J_pl = inertia_matrix(Ipl, Iplp);
 fz = -9.81*m_pl;
@@ -90,22 +90,13 @@ for i=1:length(seq(1,:))
     Q_seq(:,i) = PROinv2(seq(:,i), L(1:3), -1);
 end
 
+% ASK HOW WE CHANGE THESE VALUES CONSIDERING TRANSMISSION SYSTEM AND WHERE
+% DO WE FIND THESE NOMINAL VALUES
 motor.A = [3; 3; 3; 3];
 motor.D = [3; 3; 3; 3];
 motor.V = [4; 4; 4; 4];
 
-[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROcubic_splines(Q_seq, n_joints, motor);
-% time_vect = 0:0.1:5;
-% time_vect = time_vect;
-% joint_positions = zeros(n_joints, length(time_vect));
-% joint_velocities = zeros(n_joints, length(time_vect));
-% joint_accelerations = zeros(n_joints, length(time_vect));
-% 
-% for i = 1:n_joints
-%     joint_positions(i,:) = sin(time_vect);
-%     joint_velocities(i,:) = cos(time_vect);
-%     joint_accelerations(i,:) = -sin(time_vect);
-% end
+[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROlines_parabolas(Q_seq, n_joints, motor);
 
 
 %% Analytical Model
@@ -167,12 +158,12 @@ time_ss = out.time_ss;
 colors1 = lines(n_joints);
 for j = 1:n_joints
     figure;
-    plot(time_vect, Fq(j,:),'DisplayName', 'Analytical', LineWidth=1.5);
+    plot(time_vect, Fq(j,:),'DisplayName', 'Analytical', LineWidth=2);
     hold on;
     grid on;
-    plot(time_ss, Fq_ss(j,:), 'DisplayName', 'Simscape', LineWidth=1.5);
+    plot(time_ss, Fq_ss(j,:), 'DisplayName', 'Simscape','LineStyle','-','Color','r', LineWidth=1);
     title(sprintf('Joint %d Torques', j));
-    ylabel(sprintf('$C_{%d} [N/m]$', j), Interpreter='latex')
+    ylabel(sprintf('$C_{%d} [N*m]$', j), Interpreter='latex')
     legend('show')
 end
 
