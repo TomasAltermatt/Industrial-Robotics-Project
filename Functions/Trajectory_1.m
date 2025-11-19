@@ -16,7 +16,9 @@ function trajectory = Trajectory_1(a, b, n_points, line_start, elipse_start)
     x_linea = x0*ones(1, n_points);
     y_linea = linspace(y0, ye, n_points);
     z_linea = linspace(z0, ze, n_points);
-    line_angles = phi_0*ones(1, n_points);
+%     line_angles = phi_0*ones(1, n_points);
+    line_angles = linspace(phi_0, (phi_0 + phi_e)/2, n_points);
+
     
     line_seq = [x_linea; y_linea; z_linea; line_angles];
 
@@ -27,7 +29,8 @@ function trajectory = Trajectory_1(a, b, n_points, line_start, elipse_start)
     x_elipse = xe*ones(1, n_points);
     y_elipse = (ye+a) + a*cos(t);
     z_elipse = (ze - b*(sin(0.96*pi).^0.8)) + b*(sin(t).^0.8);
-    elipse_angles = phi_0 - 0.5*(pi-t);
+%     elipse_angles = phi_0 - 0.5*(pi - t);
+    elipse_angles = linspace((phi_0 + phi_e)/2, phi_e, n_points);
     elipse_seq = [x_elipse; y_elipse; z_elipse; elipse_angles];
 
     % Put both trajectories together (this is the output result)
