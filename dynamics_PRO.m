@@ -20,13 +20,14 @@ d1 = 5e-2;              % height
 w1 = 5e-2;              % width
 m1 = 1.4381782e0;       % link mass
 g1_vector = [7.49E+01	4.75E+01	-3.71E-01]*10^-3;
-g1 = norm(g1_vector);   % center of mass (distance)
+g1_ss = g1_vector - ([a1, 0, 0])/2;
+
+
 I1_tot = [2.72E+03	3.48E+03	-3.75E+01;
           3.48E+03	2.05E+04	2.69E+01;
           -3.75E+01	2.69E+01	2.17E+04]*10^-6;
 I1_mom = [I1_tot(1,1), I1_tot(2,2), I1_tot(3,3)];
 I1_prod = [I1_tot(1,2), I1_tot(1,3), I1_tot(2,3)];
-
 
 % Link 2 arm Parameters
 a2 = 300e-3;        % length
@@ -34,12 +35,15 @@ d2 = 4e-2;          % height
 w2 = 4e-2;          % width
 m2 = 1.4381782e0;             % link mass
 g2_vector = [7.49E+01	4.75E+01	-3.71E-01]*10^-3;
-g2 = norm(g2_vector); % center of mass (distance)
+g2_ss = g2_vector - ([a2, 0, 0])/2;
+
+
 I2_tot = [2.72E+03	3.48E+03	-3.75E+01;
           3.48E+03	2.05E+04	2.69E+01;
          -3.75E+01	2.69E+01	2.17E+04]*10^-6;
 I2_mom = [I2_tot(1,1), I2_tot(2,2), I2_tot(3,3)];
 I2_prod = [I2_tot(1,2), I2_tot(1,3), I2_tot(2,3)];
+
 
 
 % Link 3 arm Parameters
@@ -48,14 +52,14 @@ d3 = 3e-2;          % height
 w3 = 3e-2;          % width
 m3 = 3.6517977e-01;             % link mass
 g3_vector = [0.00E+00	8.11E+01	2.25E+01]*10^-3;
-g3 = norm(g3_vector);        % center of mass (distance)
+g3_ss = g3_vector - ([a3, 0, 0])/2;
+
 % Calculate the inertia matrix for Link 3
 I3_tot = [2.15E+03	0.00E+00	0.00E+00;
           0.00E+00	5.17E+02	0.00E+00;
           0.00E+00	0.00E+00	2.44E+03]*10^-6;
 I3_mom = [I3_tot(1,1), I3_tot(2,2), I3_tot(3,3)];
 I3_prod = [I3_tot(1,2), I3_tot(1,3), I3_tot(2,3)];
-
 
 
 % Save 3 inertia tensors
@@ -89,7 +93,10 @@ Fse(15) = F_rob(3);
 
 
 % Dimension vectors
-L=[a1;a2;a3;g1;g2;g3]; %[m]
+L = [a1; a2; a3; ...
+     g1_vector(1); g1_vector(2); g1_vector(3); ... 
+     g2_vector(1); g2_vector(2); g2_vector(3); ...
+     g3_vector(1); g3_vector(2); g3_vector(3)];
 
 
 %% Planning Motion curve
@@ -128,8 +135,8 @@ for i = 1:length(time_vect)
     S_vec(:,i) = PROdir(Q, L);
     
     % Extended Jacobians
-    Je = PROjacdin(Q, L);
-    Jep = PROjacPdin2(Q, Qp, L);
+    Je = PROjacdinV2(Q, L);
+    Jep = PROjacPdinV2(Q, Qp, L);
     Spp = Jep*Qp + Je*Qpp;
 
     Fq(:,i) = -Je'*(-M*Spp + Fse);
@@ -181,11 +188,12 @@ for j = 1:n_joints
     ylabel(sprintf('$C_{%d} [N*m]$', j), Interpreter='latex')
     legend('show')
     
-    figure;
-    torque_diff = Fq_ss(j,:) - Fq(j,:);
-    plot(time_ss, torque_diff,'LineStyle','-','Color','r', LineWidth=1);
-    title(sprintf('Joint %d Torques Difference', j));
-    ylabel(sprintf('$C_{%d} [N*m]$', j), Interpreter='latex')
+    % figure;
+    % torque_diff = Fq_ss(j,:) - Fq(j,:);
+    % plot(time_ss, torque_diff,'LineStyle','-','Color','r', LineWidth=1);
+    % grid on
+    % title(sprintf('Joint %d Torques Difference', j));
+    % ylabel(sprintf('$C_{%d} [N*m]$', j), Interpreter='latex')
 
 end
 
