@@ -3,14 +3,14 @@ addpath('Functions')
 
 %% --- Setup Input Ranges and Parameters ---
 % Define angle limits
-alpha_lims = [0, pi/2];
-beta_lims = [0, pi/2];
-gamma_lims = [0, pi/2];
+alpha_lims = [0, pi];
+beta_lims = [0, pi];
+gamma_lims = [0, pi];
 % theta_lims is not used for this X-Z plot as theta_0 is fixed
 theta_0 = 0; 
 
 % Define the resolution (number of points for each joint)
-N_points = 10;
+N_points = 20;
 alpha_range = linspace(alpha_lims(1), alpha_lims(2), N_points);
 beta_range = linspace(beta_lims(1), beta_lims(2), N_points);
 gamma_range = linspace(gamma_lims(1), gamma_lims(2), N_points);

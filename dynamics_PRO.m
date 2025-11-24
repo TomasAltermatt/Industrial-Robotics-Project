@@ -5,42 +5,57 @@ addpath('Functions')
 % Base Parameters
 Rb = 10e-2;
 Lb = 20e-2;
-Ib = [1, 1, 1]*10^-6;  % Inertia Moment
-Ibp = [0, 0, 0]; % Inertia Product
-Ib_tot = inertia_matrix(Ib, Ibp);
+m_base = 1.2271304; % [kg]
+g_base_vector = [1.30E+02	4.68E+01	4.42E-01]*10^-3;
+g_base = norm(g_base_vector);
+Ib_tot = [3.26E+03	-1.62E+03	-1.36E+01;
+        -1.62E+03	5.23E+03	-2.68E+01;
+        -1.36E+01	-2.68E+01	6.95E+03]*10^-6;
+Ib_mom = [Ib_tot(1,1), Ib_tot(2,2), Ib_tot(3,3)];
+Ib_prod = [Ib_tot(1,2), Ib_tot(1,3), Ib_tot(2,3)];
 
 % Link 1 arm Parameters
-a1 = 50e-2;         % length
-d1 = 5e-2;          % height
-w1 = 5e-2;          % width
-m1 = 5;             % link mass
-g1 = 0.5* a1;       % center of mass
-I1 = [ 3.8620847e+03,1.7221182e+04,1.9444675e+04]*10^-6;     % Inertia Moment
-I1p = [ -3.2999403e+03 ,  3.5137952e+01 ,  3.2038278e+01]*10^-6;    % Inertia Product
-% Calculate the inertia matrix for Link 1
-I1_tot = inertia_matrix(I1, I1p);
+a1 = 300e-3;             % length
+d1 = 5e-2;              % height
+w1 = 5e-2;              % width
+m1 = 1.4381782e0;       % link mass
+g1_vector = [7.49E+01	4.75E+01	-3.71E-01]*10^-3;
+g1 = norm(g1_vector);   % center of mass (distance)
+I1_tot = [2.72E+03	3.48E+03	-3.75E+01;
+          3.48E+03	2.05E+04	2.69E+01;
+          -3.75E+01	2.69E+01	2.17E+04]*10^-6;
+I1_mom = [I1_tot(1,1), I1_tot(2,2), I1_tot(3,3)];
+I1_prod = [I1_tot(1,2), I1_tot(1,3), I1_tot(2,3)];
+
 
 % Link 2 arm Parameters
-a2 = a1/1.4;        % length
+a2 = 300e-3;        % length
 d2 = 4e-2;          % height
 w2 = 4e-2;          % width
-m2 = 5;             % link mass
-g2 = 0.5*a2;        % center of mass
-I2 = [3.8666085e+03, 1.7241799e+04,   1.9469790e+04]*10^-6;     % Inertia Moment
-I2p = [-3.3096372e+03, 3.5119295e+01, 3.2029042e+01]*10^-6;    % Inertia Product
-% Calculate the inertia matrix for Link 2
-I2_tot = inertia_matrix(I2, I2p);
+m2 = 1.4381782e0;             % link mass
+g2_vector = [7.49E+01	4.75E+01	-3.71E-01]*10^-3;
+g2 = norm(g2_vector); % center of mass (distance)
+I2_tot = [2.72E+03	3.48E+03	-3.75E+01;
+          3.48E+03	2.05E+04	2.69E+01;
+         -3.75E+01	2.69E+01	2.17E+04]*10^-6;
+I2_mom = [I2_tot(1,1), I2_tot(2,2), I2_tot(3,3)];
+I2_prod = [I2_tot(1,2), I2_tot(1,3), I2_tot(2,3)];
+
 
 % Link 3 arm Parameters
-a3 = a2/1.4;        % length
+a3 = 200e-3;        % length
 d3 = 3e-2;          % height
 w3 = 3e-2;          % width
-m3 = 5;             % link mass
-g3 = 0.5*a3;        % center of mass
-I3 = [5.7807216e+02, 2.8034581e+03, 2.3138400e+03]*10^-6;     % Inertia Moment
-I3p = [0, 0, 0]*10^-6;    % Inertia Product
+m3 = 3.6517977e-01;             % link mass
+g3_vector = [0.00E+00	8.11E+01	2.25E+01]*10^-3;
+g3 = norm(g3_vector);        % center of mass (distance)
 % Calculate the inertia matrix for Link 3
-I3_tot = inertia_matrix(I3, I3p);
+I3_tot = [2.15E+03	0.00E+00	0.00E+00;
+          0.00E+00	5.17E+02	0.00E+00;
+          0.00E+00	0.00E+00	2.44E+03]*10^-6;
+I3_mom = [I3_tot(1,1), I3_tot(2,2), I3_tot(3,3)];
+I3_prod = [I3_tot(1,2), I3_tot(1,3), I3_tot(2,3)];
+
 
 
 % Save 3 inertia tensors
@@ -83,7 +98,7 @@ Q_seq = [];
 % End Effector Position (Initial & Final)
 
 S1 = [0; 30e-2; 5e-2; -pi/2];
-S8 = [0; 60e-2; 5e-2; -pi/4];
+S8 = [0; 40e-2; 5e-2; -pi/4];
 seq = Trajectory_1(0.15, 0.18, 10, S1, S8);
 
 for i=1:length(seq(1,:))
@@ -92,11 +107,11 @@ end
 
 % ASK HOW WE CHANGE THESE VALUES CONSIDERING TRANSMISSION SYSTEM AND WHERE
 % DO WE FIND THESE NOMINAL VALUES
-motor.A = [3; 3; 3; 3];
-motor.D = [3; 3; 3; 3];
-motor.V = [4; 4; 4; 4];
+motor.A = [1; 1; 1; 1]*10^1;
+motor.D = [1; 1; 1; 1]*5*10^0;
+motor.V = [1; 1; 1; 1]*10^2;
 
-[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROlines_parabolas(Q_seq, n_joints, motor);
+[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROcubic_splines(Q_seq, n_joints, motor);
 
 
 %% Analytical Model
@@ -165,6 +180,13 @@ for j = 1:n_joints
     title(sprintf('Joint %d Torques', j));
     ylabel(sprintf('$C_{%d} [N*m]$', j), Interpreter='latex')
     legend('show')
+    
+    figure;
+    torque_diff = Fq_ss(j,:) - Fq(j,:);
+    plot(time_ss, torque_diff,'LineStyle','-','Color','r', LineWidth=1);
+    title(sprintf('Joint %d Torques Difference', j));
+    ylabel(sprintf('$C_{%d} [N*m]$', j), Interpreter='latex')
+
 end
 
 xlabel('t [s]', Interpreter='latex')

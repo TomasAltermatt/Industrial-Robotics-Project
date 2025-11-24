@@ -39,7 +39,7 @@ function [joint_positions, joint_velocities, joint_accelerations, time_vect] = P
     c_joints = zeros(n_joints, n_pos-1);
     d_joints = Q;
     
-    step = 1e-4;
+    step = 1e-3;
     t_vec = cumsum([0, tau_vec(1,:)]);
     time_vect = t_vec(1):step:t_vec(end);
     joint_positions = zeros(n_joints, length(time_vect));

@@ -7,24 +7,7 @@ addpath('Functions')
 %% Data
 
 n_joints = 4;
-Q = [];
-
-
-% End Effector Position (Initial & Final)
-S1 = [0; 30e-2; 5e-2; -pi/6];
-S2 = [0; 35e-2; 5e-2; -pi/6];
-S3 = [0; 40e-2; 5e-2; -pi/6];
-S4 = [0; 45e-2; 5e-2; -pi/6];
-S5 = [0; 50e-2; 5e-2; -pi/6];
-S6 = [0; 55e-2; 5e-2; -pi/6];
-S7 = [0; 57.5e-2; 5e-2; -pi/6];
-S8 = [0; 60e-2; 5e-2; -pi/6];
-S9 = [0; 58e-2; 7.5e-2; -pi/6];
-S10 = [0; 56e-2; 10e-2; -pi/6];
-S11 = [0; 58e-2; 12.5e-2; -pi/3];
-S12 = [0; 60e-2; 15e-2; -pi/3];
-seq = [S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12];
-
+Q_seq = [];
 
 % Length of the links
 l1 = 50e-2; % [m]
@@ -32,8 +15,13 @@ l2 = l1/1.4;
 l3 = l2/1.4;
 L=[l1; l2; l3]';
 
+% End Effector Position (Initial & Final)
+S1 = [0; 30e-2; 5e-2; -pi/2];
+S8 = [0; 60e-2; 5e-2; -pi/4];
+seq = Trajectory_1(0.15, 0.18, 10, S1, S8);
+
 for i=1:length(seq(1,:))
-    Q(:,i) = PROinv2(seq(:,i), L, 1);
+    Q_seq(:,i) = PROinv2(seq(:,i), L(1:3), -1);
 end
 
 motor.A = [3; 3; 3; 3];
@@ -49,8 +37,8 @@ motor.V = [4; 4; 4; 4];
 % 
 % Q = [q1; q2; q3; q4];
 
-[pos_LP, vel_LP, acc_LP, t_vect_LP] = PROlines_parabolas(Q, n_joints, motor);
-[pos_CS, vel_CS, acc_CS, t_vect_CS] = PROcubic_splines(Q, n_joints, motor);
+[pos_LP, vel_LP, acc_LP, t_vect_LP] = PROlines_parabolas(Q_seq, n_joints, motor);
+[pos_CS, vel_CS, acc_CS, t_vect_CS] = PROcubic_splines(Q_seq, n_joints, motor);
 
 
 run = 1;

@@ -95,7 +95,7 @@ function [joint_positions, joint_velocities, joint_accelerations, time_vect] = P
     
     % Calculate joint positions over time using the coefficients
     
-    step = 1e-4;
+    step = 1e-3;
     time_vect = 0:step:max(t_vec(:));
     joint_positions = zeros(n_joints, length(time_vect)); % Initialize joint_positions to store the trajectory
     joint_velocities = zeros(n_joints, length(time_vect));
