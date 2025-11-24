@@ -1,3 +1,6 @@
+clear all
+% close all
+clc
 
 %% Parámetros del robot
 L1 = 0.5;
@@ -8,8 +11,8 @@ L = [L1, L2, L3];
 
 %% Rango de ángulos
 q1s = linspace(deg2rad(0), deg2rad(180), 50);
-q2s = linspace(deg2rad(55), deg2rad(305), 50);
-q3s = linspace(deg2rad(30), deg2rad(330), 90);
+q2s = linspace(deg2rad(60), deg2rad(300), 60);
+q3s = linspace(deg2rad(30), deg2rad(330), 70);
 
 
 %% Parametros del mapa
@@ -48,46 +51,27 @@ for q1 = q1s
 end
 
 
-
-%% Inicialización de almacenamiento
-positions = [];
-manipulabilities = [];
-
-%% Extraer posiciones únicas y manipulabilidad
-keys = map.keys;
-n = numel(keys);
-positions = zeros(2, n);
-manipulabilities = zeros(n,1);
-
-for i = 1:n
-    parts = sscanf(keys{i}, '%f_%f');
-    positions(:,i) = parts;
-    manipulabilities(i) = map(keys{i});
-end
-
 %% Normalización
-w_min = min(manipulabilities);
-w_max = max(manipulabilities);
-w_norm = (manipulabilities - w_min) / (w_max - w_min);
+sigma_min = min(sigma_map(:));
+sigma_max = max(sigma_map(:));
+
 
 %% Dibujo del mapa
 figure('Color','w'); clf;
 imagesc(xgrid, ygrid, sigma_map); axis equal; axis tight;
-xlabel('x [m]'); ylabel('y [m]');
-title('Mapa de manipulabilidad (3R planar, fondo cero)');
+xlabel('r [m]'); ylabel('z [m]');
+title('Manipulability Map');
 set(gca, 'YDir', 'normal');  % para que el eje Y no esté invertido
 
-colormap default;  % colormap invertido
+colormap default;
 cb = colorbar;
-cb.Label.String = 'Manipulabilidad (Yoshikawa)';
-cb.Ticks = linspace(0, max(sigma_map(:)), 5);
+cb.Label.String = 'Manipulability Index Value';
+cb.Ticks = linspace(0, sigma_max, 5);
 cb.TickLabels = arrayfun(@(x) sprintf('%.2g', x), cb.Ticks, 'UniformOutput', false);
-abels = arrayfun(@(x) sprintf('%.2g', w_min + x*(w_max - w_min)), cb.Ticks, 'UniformOutput', false);
 
-% end
+
 %% ================= Funciones auxiliares =================
 
-% This is supposed to be the direct kinematics
 function [p0, p1, p2, p3] = directKinematics3R(Q, L)
 q1 = Q(1); q2 = Q(2); q3 = Q(3);
 p0 = [0;0];
@@ -96,7 +80,6 @@ p2 = p1 + [L(2)*cos(q1+q2); L(2)*sin(q1+q2)];
 p3 = p2 + [L(3)*cos(q1+q2+q3); L(3)*sin(q1+q2+q3)];
 end
 
-% Jacobian Function
 function J = jacobian_3R(Q, L)
 q1 = Q(1); q2 = Q(2); q3 = Q(3);
 
