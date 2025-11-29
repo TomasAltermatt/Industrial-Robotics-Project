@@ -45,13 +45,20 @@ function trajectory = Trajectory_1(a, b, n_points, line_start, elipse_start)
     trajectory(1, 1+(length(trajectory)/2)) = x_elipse(1) + (x_elipse(2) - x_elipse(1))/3;
     trajectory(2, 1+(length(trajectory)/2)) = y_elipse(1) + (y_elipse(2) - y_elipse(1))/3;
     trajectory(3, 1+(length(trajectory)/2)) = z_elipse(1) + (z_elipse(2) - z_elipse(1))/3;
+    
+    trajectory_flip = trajectory;
+    for i = 1:4
+        trajectory_flip(i, :) = flip(trajectory(i, :));
+    end
+        
+    trajectory =[trajectory, trajectory_flip(:,2:end)];
 
     % Plot
-    figure;
-    plot(trajectory(2,:), trajectory(3,:), 'rx-', 'LineWidth', 2);
-    grid on;
-    xlabel('x');
-    ylabel('y');
-    title('Trajectory');
-    axis equal;
+    % figure;
+    % plot(trajectory(2,:), trajectory(3,:), 'rx-', 'LineWidth', 2);
+    % grid on;
+    % xlabel('x');
+    % ylabel('y');
+    % title('Trajectory');
+    % axis equal;
 end
