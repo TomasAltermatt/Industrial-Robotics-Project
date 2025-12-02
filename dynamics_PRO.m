@@ -74,8 +74,12 @@ J_rob(:,:,4) = Ib_tot;
 m_rob = [m1, m2, m3];
 F_rob = -9.81*m_rob;
 
+% Torsional spring parameters
+kt = 12; % Nm/rad
+theta1_preload = pi/1.65;
+
 % Payload
-m_pl = 0.5;
+m_pl = 1;
 Ipl = [0, 0, 0];
 Iplp = [0, 0, 0];
 J_pl = inertia_matrix(Ipl, Iplp);
@@ -118,7 +122,7 @@ motor.A = [1; 1; 1; 1]*10^1;
 motor.D = [1; 1; 1; 1]*5*10^0;
 motor.V = [1; 1; 1; 1]*10^2;
 
-[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROcubic_splines(Q_seq, n_joints, motor);
+[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROlines_parabolas(Q_seq, n_joints, motor);
 
 
 %% Analytical Model
@@ -138,6 +142,10 @@ for i = 1:length(time_vect)
     Je = PROjacdinV2(Q, L);
     Jep = PROjacPdinV2(Q, Qp, L);
     Spp = Jep*Qp + Je*Qpp;
+
+    % Torsional Spring Contribution
+    F_spring = -kt * (Q(1) - theta1_preload); % Calculate the spring force
+    Fse(8)= F_spring; % Add spring force contribution to the first joint
 
     Fq(:,i) = -Je'*(-M*Spp + Fse);
 end
