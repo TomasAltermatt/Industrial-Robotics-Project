@@ -18,13 +18,13 @@ Ib_prod = [Ib_tot(1,2), Ib_tot(1,3), Ib_tot(2,3)];
 a1 = 360e-3;             % length
 d1 = 4e-2;              % height
 w1 = 53.823e-3;              % width
-m1 = 2.065;       % link mass
-g1_vector = [285.975	19.457	-0.362]*10^-3;
+m1 = 1.9886957e+00;       % link mass
+g1_vector = [2.8305972e+02  1.9847175e+01 -3.6990314e-01]*10^-3;
 g1_ss = g1_vector - ([a1, 0, 0])/2;
 
-I1_tot = [3306.311	-4095.305	54.416
-          -4095.305	24169.165	31.181;
-          54.416	31.181	26001.168]*10^-6;
+I1_tot = [4.10E+03	-4.15E+03	4.31E+01
+        -4.15E+03	2.36E+04	5.15E+01
+        4.31E+01	5.15E+01	2.64E+04]*10^-6;
 I1_mom = [I1_tot(1,1), I1_tot(2,2), I1_tot(3,3)];
 I1_prod = [I1_tot(1,2), I1_tot(1,3), I1_tot(2,3)];
 
@@ -33,13 +33,13 @@ I1_prod = [I1_tot(1,2), I1_tot(1,3), I1_tot(2,3)];
 a2 = 300e-3;        % length
 d2 = 4e-2;          % height
 w2 = 53.823e-3;          % width
-m2 = 1.951;             % link mass
+m2 = 1.6741142e+00;             % link mass
 g2_vector = [242.58	-21.483	0.383]*10^-3;
 g2_ss = g2_vector - ([a2, 0, 0])/2;
 
-I2_tot = [3063.67	2851.121	-41.994;
-          2851.121	14954.957	29.665;
-         -41.994	29.665	16626.644]*10^-6;
+I2_tot = [2.65E+03	2.12E+03	-9.67E+00
+        2.12E+03	1.36E+04	1.38E+00
+        -9.67E+00	1.38E+00	1.51E+04]*10^-6;
 I2_mom = [I2_tot(1,1), I2_tot(2,2), I2_tot(3,3)];
 I2_prod = [I2_tot(1,2), I2_tot(1,3), I2_tot(2,3)];
 
@@ -54,9 +54,10 @@ g3_vector = [82.123	-6.987	-0.005]*10^-3;
 g3_ss = g3_vector - ([a3, 0, 0])/2;
 
 % Calculate the inertia matrix for Link 3
-I3_tot = [82.466	-98.028	    0.042;
-          -98.028	938.378	   -0.004;
-          0.042	    -0.004	    903.268]*10^-6;
+I3_tot = [88.25E+01	-9.81E+01	4.07E-02
+-9.81E+01	9.39E+02	-4.74E-03
+4.07E-02	-4.74E-03	9.04E+02
+]*10^-6;
 I3_mom = [I3_tot(1,1), I3_tot(2,2), I3_tot(3,3)];
 I3_prod = [I3_tot(1,2), I3_tot(1,3), I3_tot(2,3)];
 
@@ -73,9 +74,11 @@ J_rob(:,:,4) = Ib_tot;
 m_rob = [m1, m2, m3];
 F_rob = -9.81*m_rob;
 
-% Torsional spring parameters
-kt = 15; % Nm/rad
-theta1_preload = pi/1.5;
+% Linear Spring Parameters
+k = 5e3;     % Linear Spring stiffness (N/m)
+x0 = 16e-2;  % Spring preload (m)
+Cc = 128.47e-3; % Center to center distance (m)
+r = 51.4e-3;   % Arm distance (m)
 
 % Payload
 m_pl = 1;
@@ -141,15 +144,28 @@ for i = 1:length(time_vect)
     Je = PROjacdinV2(Q, L);
     Jep = PROjacPdinV2(Q, Qp, L);
     Spp = Jep*Qp + Je*Qpp;
-
-    % Torsional Spring Contribution
-    F_spring = -kt * (Q(1) - theta1_preload); % Calculate the spring force
+    
+    % Spring Contribution
+    Ls = sqrt( (Cc - r*sin(Q(1)) )^2 +  (r*cos(Q(1)))^2);
+    Fs = -k * (Ls - x0);
+    F_spring = Fs*r*Cc*cos(Q(1))/sqrt(r^2 + Cc^2 - 2*r*Cc*sin(Q(1)));
     Fse(8)= F_spring; % Add spring force contribution to the first joint
 
     Fq(:,i) = -Je'*(-M*Spp + Fse);
 end
 
 %% Simscape Model
+
+% Torque time vector
+Q = joint_positions(1,:);
+% Spring Contribution
+Ls = sqrt( (Cc - r*sin(Q)).^2 +  (r*cos(Q)).^2);
+Fs_vect = -k * (Ls - x0);
+F_spring_vect = Fs_vect*r*Cc.*cos(Q)./sqrt(r^2 + Cc^2 - 2*r*Cc*sin(Q));
+
+% Create timeseries for External torque vector
+F_ts_spring = timeseries(F_spring_vect, time_vect, 'Name', 'Joint1SpringTorque');
+F_ts_spring_neg = timeseries(-F_spring_vect, time_vect, 'Name', 'Joint1SpringTorque');
 
 % 1. Create the Time-Series Object for Position
 q_ts_j1 = timeseries(joint_positions(1,:), time_vect, 'Name', 'Joint1Position');
