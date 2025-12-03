@@ -15,48 +15,48 @@ Ib_mom = [Ib_tot(1,1), Ib_tot(2,2), Ib_tot(3,3)];
 Ib_prod = [Ib_tot(1,2), Ib_tot(1,3), Ib_tot(2,3)];
 
 % Link 1 arm Parameters
-a1 = 500e-3;             % length
+a1 = 360e-3;             % length
 d1 = 4e-2;              % height
 w1 = 53.823e-3;              % width
-m1 = 2.668;       % link mass
-g1_vector = [364.452	13.076	-0.28]*10^-3;
+m1 = 2.065;       % link mass
+g1_vector = [285.975	19.457	-0.362]*10^-3;
 g1_ss = g1_vector - ([a1, 0, 0])/2;
 
-I1_tot = [4195.832	-8841.983	100.269
-          -8841.983	76643.842	35.805;
-          100.269	35.805	78836.448]*10^-6;
+I1_tot = [3306.311	-4095.305	54.416
+          -4095.305	24169.165	31.181;
+          54.416	31.181	26001.168]*10^-6;
 I1_mom = [I1_tot(1,1), I1_tot(2,2), I1_tot(3,3)];
 I1_prod = [I1_tot(1,2), I1_tot(1,3), I1_tot(2,3)];
 
 
 % Link 2 arm Parameters
-a2 = 360e-3;        % length
+a2 = 300e-3;        % length
 d2 = 4e-2;          % height
 w2 = 53.823e-3;          % width
-m2 = 2.395;             % link mass
-g2_vector = [270.07	-16.397	0.312]*10^-3;
+m2 = 1.951;             % link mass
+g2_vector = [242.58	-21.483	0.383]*10^-3;
 g2_ss = g2_vector - ([a2, 0, 0])/2;
 
-I2_tot = [3700.133	4962.496	-66.198;
-          4962.496	32619.789	33.324;
-         -66.198	33.324	34512.805]*10^-6;
+I2_tot = [3063.67	2851.121	-41.994;
+          2851.121	14954.957	29.665;
+         -41.994	29.665	16626.644]*10^-6;
 I2_mom = [I2_tot(1,1), I2_tot(2,2), I2_tot(3,3)];
 I2_prod = [I2_tot(1,2), I2_tot(1,3), I2_tot(2,3)];
 
 
 
 % Link 3 arm Parameters
-a3 = 260e-3;        % length
+a3 = 190e-3;        % length
 d3 = 4e-2;          % height
 w3 = 53.823e-3;          % width
-m3 = 0.395;             % link mass
-g3_vector = [83.803	-9.676	-0.002]*10^-3;
+m3 = 0.215;             % link mass
+g3_vector = [82.123	-6.987	-0.005]*10^-3;
 g3_ss = g3_vector - ([a3, 0, 0])/2;
 
 % Calculate the inertia matrix for Link 3
-I3_tot = [170.784	-256.087	0.076;
-          -256.087	3036.427	-0.003;
-          0.076	    -0.003	    2952.429]*10^-6;
+I3_tot = [82.466	-98.028	    0.042;
+          -98.028	938.378	   -0.004;
+          0.042	    -0.004	    903.268]*10^-6;
 I3_mom = [I3_tot(1,1), I3_tot(2,2), I3_tot(3,3)];
 I3_prod = [I3_tot(1,2), I3_tot(1,3), I3_tot(2,3)];
 
@@ -74,8 +74,8 @@ m_rob = [m1, m2, m3];
 F_rob = -9.81*m_rob;
 
 % Torsional spring parameters
-kt = 12; % Nm/rad
-theta1_preload = pi/1.65;
+kt = 15; % Nm/rad
+theta1_preload = pi/1.5;
 
 % Payload
 m_pl = 1;

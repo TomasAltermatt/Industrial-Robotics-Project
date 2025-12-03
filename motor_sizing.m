@@ -3,19 +3,22 @@ run('dynamics_PRO.m')
 %% Catalog Motor Data (ALL MOTORS WITH POWER < 200W)
 
 % Motor Names
-Motor = {'HG-MR053', 'HG-MR13', 'HG-MR23','HG-KR053', 'HG-KR13', 'HG-KR23'};
+Motor = {'HG-MR053', 'HG-MR053B',  'HG-MR13', 'HG-MR13B',  'HG-MR23', 'HG-MR23B',...
+    'HG-KR053', 'HG-KR053B', 'HG-KR13', 'HG-KR13B', 'HG-KR23', 'HG-KR23K', 'HG-KR23B'};
+
+motor_maxrpm_torque = [0.08 0.08  0.18 0.18  0.35 0.35  0.07 0.07  0.15 0.15  0.4 0.4 0.4];
 
 % Motor Inertia (Including brakes) [kg*m^2]
-Jm = [0.0224 0.0362 0.109 0.0472 0.0837 0.243]'*10^-4;
+Jm = [0.0162 0.0224   0.03 0.0362   0.0865 0.109   0.0450 0.0472   0.0777 0.0837   0.221 0.221 0.243]'*10^-4;
 
 % Motor Mass (Including brakes) [kg]
-Mm = [0.54 0.74 1.3 0.54 0.74 1.3]';
+Mm = [0.34 0.54   0.54 0.74   0.91 1.3   0.34 0.54   0.54 0.74   0.91 0.91 1.3]';
 
 % Nominal Torque [N*m]
-Cn = [0.16 0.32 0.64 0.16 0.32 0.64]';
+Cn = [0.16 0.16   0.32 0.32   0.64 0.64   0.16 0.16   0.32 0.32   0.64 0.64 0.64]';
 
 % Maximum Torque [N*m]
-Cmax = [0.48 0.95 1.9 0.56 1.1 2.2]';
+Cmax = [0.48 0.48   0.95 0.95   1.9 1.9   0.56 0.56   1.1 1.1   2.2 2.2 2.2]';
 
 % Nominal rpm
 rpm_n = 3000*ones(length(Cn), 1);
@@ -139,13 +142,13 @@ end
 
 %% Test a certain transmission ratio for each joint
 
-tau = [1/100; 0.0021; 1/100; 1/100];
+tau = [1/16; 1/16; 1/16; 1/16];
 n_motors = length(Jm);
 
 for j = 1:n_joints
     figure;
     for m = 1:length(Motor)
-        subplot(2,3,m)
+        subplot(4,4,m)
         % Get motor torques
         Cm_j = tau(j)*Fq(j,:) + Jm(m)*Qpp(j,:)/tau(j);  % motor torque vect
         Cm_j_q = rms(Cm_j);                             % motor torque RMS
@@ -153,14 +156,39 @@ for j = 1:n_joints
         [Cm_j_sorted, sort_idx] = sort(Cm_j, 'ascend');
         motor_rpm_vect_sorted = motor_rpm_vect(sort_idx);
 
-        plot(motor_rpm_vect, Cm_j, 'LineWidth',1.5);
+        plot(abs(motor_rpm_vect), Cm_j, 'LineWidth',1.5);
         hold on
         grid on
-        plot([0, rpm_max(m)], [Cn(m),Cn(m)],'Color','g')
+
+        % Plot Nominal torque curves (eyeballed)
+        % get coeffs for decrease
+        x1 = rpm_n(m);
+        x2 = rpm_max(m);
+        y1 = Cn(m);
+        y2 = motor_maxrpm_torque(m);
+        b = (x1*y1 - x2*y2)/(y2 - y1);
+        k = y1*(x1 + b);
+        rpm_dec_segment = rpm_n(m):0.1:rpm_max(m);
+        Cn_dec_segment = k./(rpm_dec_segment + b);
+        plot([0, rpm_n(m), rpm_dec_segment], [Cn(m),Cn(m), Cn_dec_segment],'Color','g')
+        
+
+        % Plot Maximum torque curves (eyeballed)
         plot([0, rpm_max(m)], [Cmax(m),Cmax(m)],'Color','r')
-        plot([0, rpm_max(m)], [Cm_j_q,Cm_j_q])
-        xlim([0, max(motor_rpm_vect)*1.2])
-        legend('Cm', 'Nominal Torque', 'Maximum Catalogue Torque', 'RMS Torque')
+        
+        % Plot RMS torque
+        plot([0, rpm_max(m)], [Cm_j_q,Cm_j_q], 'Color',"magenta")
+        
+        % Plot negatives of max/nominal torques
+        plot([0, rpm_n(m), rpm_dec_segment], -[Cn(m),Cn(m), Cn_dec_segment],'Color','g')
+        plot([0, rpm_max(m)], -[Cmax(m),Cmax(m)],'Color','r')
+
+        % Limits
+        xlim([0, rpm_max(m)])
+        ylim([-1.15*Cmax(m), 1.15*Cmax(m)])
         title(sprintf('%s, Joint %d', Motor{m}, j))
+
+
     end
+    legend('Cm', 'Nominal Torque', 'Maximum Catalogue Torque', 'RMS Torque')
 end 
