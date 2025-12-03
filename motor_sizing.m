@@ -4,7 +4,7 @@ run('dynamics_PRO.m')
 
 % Motor Names
 Motor = {'HG-MR053', 'HG-MR13', 'HG-MR23','HG-KR053', 'HG-KR13', 'HG-KR23'};
-motor_maxrpm_torque = [0.08 0.08  0.18 0.18  0.35 0.35  0.07 0.07  0.15 0.15  0.4 0.4 0.4];
+motor_maxrpm_torque = [0.08   0.18   0.35   0.07  0.15  0.4];
 
 % Motor Inertia (Including brakes) [kg*m^2]
 Jm = [0.0224 0.0362 0.109 0.0472 0.0837 0.243]'*10^-4;
@@ -143,13 +143,13 @@ end
 
 %% Test a certain transmission ratio for each joint
 
-tau = [1/16; 1/25; 1/25; 1/16];
+tau = [1/16.77; 1/25; 1/25; 1/6];
 n_motors = length(Jm);
 
 for j = 1:n_joints
     figure;
     for m = 1:length(Motor)
-        subplot(3,2,m)
+        subplot(2,3,m)
         % Get motor torques
         Cm_j = tau(j)*Fq(j,:) + Jm(m)*Qpp(j,:)/tau(j);  % motor torque vect
         Cm_j_q = rms(Cm_j);                             % motor torque RMS
@@ -193,3 +193,8 @@ for j = 1:n_joints
     end
     legend('Cm', 'Nominal Torque', 'Maximum Catalogue Torque', 'RMS Torque')
 end 
+
+% Joint 1: MR-23 (3)
+% Joint 2: MR-13 (2)
+% Joint 3: MR-053 (1)
+% Joint Base: KR-23 (6)
