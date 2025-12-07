@@ -1,4 +1,11 @@
-run('dynamics_PRO.m')
+trajectory = input('Which trajectory do we size?\n [1] Trajectory 1 (ABC)\n [2] Trajectory 2 (ADE)\n');
+if trajectory == 1
+    run("dynamics_PRO_Trajectory1.m")
+elseif trajectory == 2
+    run("dynamics_PRO_Trajectory2.m")
+else
+    error("Please input a valid trajectory")
+end
 
 %% Catalog Motor Data (ALL MOTORS WITH POWER < 200W)
 
@@ -189,7 +196,8 @@ for j = 1:n_joints
         ylim([-1.15*Cmax(m), 1.15*Cmax(m)])
         title(sprintf('%s, Joint %d', Motor{m}, j))
 
-
+        xlabel('$\omega [rpm]$', Interpreter='latex')
+        ylabel('Torque $[N \cdot m]$', Interpreter='latex')
     end
     legend('Cm', 'Nominal Torque', 'Maximum Catalogue Torque', 'RMS Torque')
 end 
@@ -198,3 +206,117 @@ end
 % Joint 2: MR-13 (2)
 % Joint 3: MR-053 (1)
 % Joint Base: KR-23 (6)
+
+%% Choose Motor
+motor_select = zeros(length(tau), 1);
+tau_max_select = zeros(length(tau), 1);
+tau_min_select = zeros(length(tau), 1);
+tau_p_select = zeros(length(tau), 1);
+tau_opt_select = zeros(length(tau), 1);
+
+% Prompt generation
+prompt_header = 'Which motor do you choose?:\n';
+prompt_options = '';
+for m = 1:length(Motor)
+    prompt_options = [prompt_options, sprintf(' [%d] %s\n', m, Motor{m})];
+end
+full_prompt = [prompt_header, prompt_options, sprintf('Your choice: ')];
+
+% Motor selection
+for j = 1:n_joints
+    if j == 4
+        disp("Base Joint Motor Selection")
+    else
+        fprintf("\nJoint %d Motor Selection\n", j)
+    end
+    
+    % revise selection
+    m = input(full_prompt);
+    motor_select(j) = m;
+    tau_max_select(j) = tau_max(j,m);
+    tau_min_select(j) = tau_min(j,m);
+    tau_opt_select(j) = tau_opt(j,m);
+    tau_p_select(j) = tau_p(j,m);
+end
+
+
+% Motor selection
+for j = 1:n_joints
+    m = motor_select(j);
+    %-------------------- PLOT TORQUE CURVES------------------------------%
+    % Get motor torques
+        Cm_j = tau(j)*Fq(j,:) + Jm(m)*Qpp(j,:)/tau(j);  % motor torque vect
+        Cm_j_q = rms(Cm_j);                             % motor torque RMS
+        motor_rpm_vect = (Qp(j,:)/tau(j))*30/pi;
+        [Cm_j_sorted, sort_idx] = sort(Cm_j, 'ascend');
+        motor_rpm_vect_sorted = motor_rpm_vect(sort_idx);
+        
+        figure;
+        plot(abs(motor_rpm_vect), Cm_j, 'LineWidth',1.5);
+        hold on
+        grid on
+
+        % Plot Nominal torque curves (eyeballed)
+        % get coeffs for decrease
+        x1 = rpm_n(m);
+        x2 = rpm_max(m);
+        y1 = Cn(m);
+        y2 = motor_maxrpm_torque(m);
+        b = (x1*y1 - x2*y2)/(y2 - y1);
+        k = y1*(x1 + b);
+        rpm_dec_segment = rpm_n(m):0.1:rpm_max(m);
+        Cn_dec_segment = k./(rpm_dec_segment + b);
+        plot([0, rpm_n(m), rpm_dec_segment], [Cn(m),Cn(m), Cn_dec_segment],'Color','g')
+        
+
+        % Plot Maximum torque curves (eyeballed)
+        plot([0, rpm_max(m)], [Cmax(m),Cmax(m)],'Color','r')
+        
+        % Plot RMS torque
+        plot([0, rpm_max(m)], [Cm_j_q,Cm_j_q], 'Color',"magenta")
+        
+        % Plot negatives of max/nominal torques
+        plot([0, rpm_n(m), rpm_dec_segment], -[Cn(m),Cn(m), Cn_dec_segment],'Color','g')
+        plot([0, rpm_max(m)], -[Cmax(m),Cmax(m)],'Color','r')
+
+        % Limits
+        %xlim([0, rpm_max(m)])
+        ylim([-1.15*Cmax(m), 1.15*Cmax(m)])
+        title(sprintf('%s, Joint %d', Motor{m}, j))
+        xlabel('$\omega [rpm]$', Interpreter='latex')
+        ylabel('Torque $[N \cdot m]$', Interpreter='latex')
+        legend('Cm', 'Nominal Torque', 'Maximum Catalogue Torque', 'RMS Torque')
+end
+
+% ---------------TAU PLOT SECTION------------------------------------%
+figure;
+scatter(motor_select, tau_max_select, 40, 'blue','filled','^', 'DisplayName', ...
+    '$\tau_{max}$')   % tau max
+hold on
+grid on
+scatter(motor_select, tau_opt_select, 40, 'green','filled','o', 'DisplayName', ...
+    '$\tau_{opt}$')   % tau opt
+scatter(motor_select, tau_min_select, 40, 'blue','filled','v', 'DisplayName', ...
+    '$\tau_{min}$')   % tau min
+scatter(motor_select, tau_p_select, 40, 'black','filled','hexagram', 'DisplayName', ...
+    '$\tau_{p}$')   % taup
+scatter(motor_select, tau, 40, 'red','filled','o', 'DisplayName', ...
+    '$\tau_{selected}$')   % tau max
+
+set(gca, 'YScale', 'log');
+title('$\tau$ Diagram, Selected Motors', Interpreter="latex")
+
+% Label with motor names
+xticks([1, 2, 3, 4]);
+xticklabels({'Joint 1', 'Joint 2', 'Joint 3', 'Base Joint'});
+xtickangle(45);
+
+xlim([0, n_joints+1])
+% Axis labels
+ylabel('$\tau [N \cdot m]$', 'Interpreter', 'latex', 'FontSize', 14);
+xlabel('Joint', 'Interpreter', 'latex', 'FontSize', 14);
+
+
+% Legend
+L = legend('show', 'Location','best');
+set(L, 'Interpreter', 'latex', 'FontSize',16)
