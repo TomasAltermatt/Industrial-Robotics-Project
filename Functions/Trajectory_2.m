@@ -55,7 +55,7 @@ function trajectory = Trajectory_2(a, b, n_points, line_start, elipse_start)
     x_seg = trajectory(1,:);
     z_seg = trajectory(3,:);
     
-    trajectory(1,:) = z_seg;
+    trajectory(1,:) = -z_seg;
     trajectory(3,:) = x_seg;
     
 
