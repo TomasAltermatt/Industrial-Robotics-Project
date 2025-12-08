@@ -1,11 +1,3 @@
-trajectory = input('Which trajectory do we size?\n [1] Trajectory 1 (ABC)\n [2] Trajectory 2 (ADE)\n');
-if trajectory == 1
-    run("dynamics_PRO_Trajectory1.m")
-elseif trajectory == 2
-    run("dynamics_PRO_Trajectory2.m")
-else
-    error("Please input a valid trajectory")
-end
 
 %% Catalog Motor Data (ALL MOTORS WITH POWER < 200W)
 

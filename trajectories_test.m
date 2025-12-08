@@ -10,23 +10,23 @@ n_joints = 4;
 Q_seq = [];
 
 % Length of the links
-l1 = 50e-2; % [m]
-l2 = l1/1.4;
-l3 = l2/1.4;
+l1 = 341.000e-3; % [m]
+l2 = 272.000e-3;
+l3 = 181e-3;
 L=[l1; l2; l3]';
 
 % End Effector Position (Initial & Final)
 S1 = [0; 30e-2; 5e-2; -pi/2];
-S8 = [0; 60e-2; 5e-2; -pi/4];
+S8 = [0; 40e-2; 5e-2; -pi/4];
 seq = Trajectory_1(0.15, 0.18, 10, S1, S8);
 
 for i=1:length(seq(1,:))
     Q_seq(:,i) = PROinv2(seq(:,i), L(1:3), -1);
 end
 
-motor.A = [3; 3; 3; 3];
-motor.D = [3; 3; 3; 3];
-motor.V = [4; 4; 4; 4];
+motor.A = [1; 1; 1; 1]*10^1;
+motor.D = [1; 1; 1; 1]*5*10^0;
+motor.V = [1; 1; 1; 1]*10^2;
 
 % Adapt based on desired Workspace Positions, not arbitrarily
 % Each q represents a joint, each entry represents a position
@@ -59,8 +59,8 @@ while run == 1
     hold on
     plot(t_vect_LP, pos_LP(i,:), ...
         'DisplayName', sprintf('Lines and Parabolas'), LineWidth=1.5);
-    plot(t_vect_CS, pos_CS(i,:), ...
-        'DisplayName', sprintf('Cubic Splines'), LineWidth=1.5);
+    % plot(t_vect_CS, pos_CS(i,:), ...
+    %     'DisplayName', sprintf('Cubic Splines'), LineWidth=1.5);
     title(sprintf('Joint %d Position', i));
     xlabel('t [s]', Interpreter='latex')
     ylabel('q [rad]', Interpreter='latex')
@@ -74,8 +74,8 @@ while run == 1
     hold on;
     plot(t_vect_LP, vel_LP(i,:),  ...
         'DisplayName', sprintf('Lines and Parabolas'), LineWidth=1.5);
-    plot(t_vect_CS, vel_CS(i,:), ...
-        'DisplayName', sprintf('Cubic Splines'), LineWidth=1.5);
+    % plot(t_vect_CS, vel_CS(i,:), ...
+    %     'DisplayName', sprintf('Cubic Splines'), LineWidth=1.5);
     title(sprintf('Joint %d Velocity', i));
     xlabel('t [s]', Interpreter='latex')
     ylabel('$\dot q$ [rad/s]', Interpreter='latex')
@@ -89,8 +89,8 @@ while run == 1
     hold on;
     plot(t_vect_LP, acc_LP(i,:), ...
         'DisplayName', sprintf('Lines and Parabolas'), LineWidth=1.5);
-    plot(t_vect_CS, acc_CS(i,:), ...
-        'DisplayName', sprintf('Cubic Splines'), LineWidth=1.5);
+    % plot(t_vect_CS, acc_CS(i,:), ...
+    %     'DisplayName', sprintf('Cubic Splines'), LineWidth=1.5);
     title(sprintf('Joint %d Acceleration', i));
     xlabel('t [s]', Interpreter='latex')
     ylabel('$\ddot q$ [rad/$s^2$]', Interpreter='latex')

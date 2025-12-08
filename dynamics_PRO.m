@@ -107,19 +107,11 @@ L = [a1; a2; a3; ...
      g2_vector(1); g2_vector(2)-w1; g2_vector(3); ...
      g3_vector(1); g3_vector(2)+w2; g3_vector(3)];
 
+%% Trajectory selection
+trajectory = input('Which trajectory do we size?\n [1] Trajectory 1 (ABC)\n [2] Trajectory 2 (ADE)\n');
+
 
 %% Planning Motion curve
-n_joints = 4;
-Q_seq = [];
-% End Effector Position (Initial & Final)
-
-S1 = [0; 30e-2; 5e-2; -pi/2];
-S8 = [0; 40e-2; 5e-2; -pi/4];
-seq = Trajectory_2(0.15, 0.18, 10, S1, S8);
-
-for i=1:length(seq(1,:))
-    Q_seq(:,i) = PROinv2(seq(:,i), L(1:3), -1);
-end
 
 % ASK HOW WE CHANGE THESE VALUES CONSIDERING TRANSMISSION SYSTEM AND WHERE
 % DO WE FIND THESE NOMINAL VALUES
@@ -127,8 +119,30 @@ motor.A = [1; 1; 1; 1]*10^1;
 motor.D = [1; 1; 1; 1]*5*10^0;
 motor.V = [1; 1; 1; 1]*10^2;
 
-%[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROlines_parabolas(Q_seq, n_joints, motor);
-[joint_positions, joint_velocities, joint_accelerations, time_vect] = PROcubic_splines(Q_seq, n_joints, motor);
+n_joints = 4;
+Q_seq = [];
+
+% End Effector Position (Initial & Final)
+S1 = [0; 30e-2; 5e-2; -pi/2];
+S8 = [0; 40e-2; 5e-2; -pi/4];
+
+if trajectory == 1
+    seq = Trajectory_1(0.15, 0.18, 10, S1, S8);
+    for i=1:length(seq(1,:))
+        Q_seq(:,i) = PROinv2(seq(:,i), L(1:3), -1);
+    end
+    [joint_positions, joint_velocities, joint_accelerations, time_vect] = PROlines_parabolas(Q_seq, n_joints, motor);
+
+elseif trajectory == 2
+    seq = Trajectory_2(0.15, 0.18, 10, S1, S8);
+    for i=1:length(seq(1,:))
+        Q_seq(:,i) = PROinv2(seq(:,i), L(1:3), -1);
+    end
+    [joint_positions, joint_velocities, joint_accelerations, time_vect] = PROcubic_splines(Q_seq, n_joints, motor);
+else
+    error("Invalid Trajectory")
+end
+
 
 
 %% Analytical Model
