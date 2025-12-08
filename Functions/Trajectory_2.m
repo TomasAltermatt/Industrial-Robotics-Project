@@ -1,14 +1,14 @@
 function trajectory = Trajectory_2(a, b, n_points, line_start, elipse_start)
     % line start point
-    x0 = line_start(3);
+    x0 = line_start(1);
     y0 = line_start(2);
-    z0 = line_start(1);
+    z0 = line_start(3);
     phi_0 = line_start(4);
     
     % ellipse start point
-    xe = elipse_start(3);
+    xe = elipse_start(1);
     ye = elipse_start(2);
-    ze = elipse_start(1);
+    ze = elipse_start(3);
     phi_e = elipse_start(4);
 
 
@@ -26,9 +26,10 @@ function trajectory = Trajectory_2(a, b, n_points, line_start, elipse_start)
     t = linspace(0.96*pi, 9*pi/20, n_points);
 
     % Elipse equations, modified so it has some offset and not perfect rounded
-    x_elipse = xe*ones(1, n_points);
+    x_elipse = -((xe - b*(sin(0.96*pi).^0.8)) + b*(sin(t).^0.8));
     y_elipse = (ye+a) + a*cos(t);
-    z_elipse = (ze - b*(sin(0.96*pi).^0.8)) + b*(sin(t).^0.8);
+    z_elipse = ze*ones(1, n_points);
+    
 %     elipse_angles = phi_0 - 0.5*(pi - t);
     elipse_angles = linspace((phi_0 + phi_e)/2, phi_e, n_points);
     elipse_seq = [x_elipse; y_elipse; z_elipse; elipse_angles];
@@ -52,11 +53,6 @@ function trajectory = Trajectory_2(a, b, n_points, line_start, elipse_start)
     end
     
     trajectory =[trajectory, trajectory_flip(:,2:end)];
-    x_seg = trajectory(1,:);
-    z_seg = trajectory(3,:);
-    
-    trajectory(1,:) = -z_seg;
-    trajectory(3,:) = x_seg;
     
 
     % Plot

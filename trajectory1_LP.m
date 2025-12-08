@@ -38,8 +38,7 @@ motor.V = [1; 1; 1; 1]*10^2;
 % Q = [q1; q2; q3; q4];
 
 [pos_LP, vel_LP, acc_LP, t_vect_LP] = PROlines_parabolas(Q_seq, n_joints, motor);
-[pos_CS, vel_CS, acc_CS, t_vect_CS] = PROcubic_splines(Q_seq, n_joints, motor);
-
+colors1 = lines(n_joints);
 
 run = 1;
 while run == 1
@@ -49,9 +48,9 @@ while run == 1
         continue
     end
 
-    
-    colors1 = lines(n_joints);
-    
+
+
+
     % position
     % subplot(3, n_joints, i);
     figure;
@@ -65,8 +64,8 @@ while run == 1
     xlabel('t [s]', Interpreter='latex')
     ylabel('q [rad]', Interpreter='latex')
     legend show
-    
-    
+
+
     % velocity
     % subplot(3, n_joints, i+4);
     figure;
@@ -80,8 +79,8 @@ while run == 1
     xlabel('t [s]', Interpreter='latex')
     ylabel('$\dot q$ [rad/s]', Interpreter='latex')
     legend show
-    
-    
+
+
     % acceleration
     % subplot(3, n_joints, i+8);
     figure;
@@ -105,43 +104,46 @@ while run == 1
 
 end
 
-show_all = input("Show all plots?\n [1] Yes\n [0] No\n");
-if show_all == 1
-    close all
-    for j = 1:n_joints
-        figure(1);
-        hold on
-        grid on;
-        subplot(n_joints, 1, j)
-        plot(t_vect_LP, pos_LP(j,:),'Color', colors1(j,:), ...
-            'DisplayName', sprintf('$q_{%d}$', j), LineWidth=1.5);
-        title(sprintf('Joint %d Position', j));
-        xlabel('t [s]', Interpreter='latex')
-        ylabel('$q [rad]$', Interpreter='latex')
 
-        figure(2);
-        hold on
-        grid on;
-        subplot(n_joints, 1, j)
-        plot(t_vect_LP, vel_LP(j,:),'Color', colors1(j,:), ...
-            'DisplayName', sprintf('$q_{%d}$', j), LineWidth=1.5);
-        title(sprintf('Joint %d Velocity', j));
-        xlabel('t [s]', Interpreter='latex')
-        ylabel('$\dot q [rad/s]$', Interpreter='latex')
+for j = 1:n_joints
+    figure(1);
+    hold on
+    grid on;
+    plot(t_vect_LP, pos_LP(j,:),'Color', colors1(j,:), ...
+        'DisplayName', sprintf('$q_{%d}$', j), LineWidth=1.5);
+    title('Joint Positions (ABC Trajectory)');
+    xlabel('t [s]', Interpreter='latex')
+    ylabel('$q [rad]$', Interpreter='latex')
+    L = legend('show', 'Location','best');
+    set(L, 'Interpreter', 'latex')
 
 
-        figure(3);
-        hold on
-        grid on;
-        subplot(n_joints, 1, j)
-        plot(t_vect_LP, acc_LP(j,:),'Color', colors1(j,:), ...
-            'DisplayName', sprintf('$q_{%d}$', j), LineWidth=1.5);
-        title(sprintf('Joint %d Acceleration', j));
-        xlabel('t [s]', Interpreter='latex')
-        ylabel('$\ddot q [rad/s^2]$', Interpreter='latex')
+    figure(2);
+    hold on
+    grid on;
+    plot(t_vect_LP, vel_LP(j,:),'Color', colors1(j,:), ...
+        'DisplayName', sprintf('$q_{%d}$', j), LineWidth=1.5);
+    title('Joint Velocities (ABC Trajectory)');
+    xlabel('t [s]', Interpreter='latex')
+    ylabel('$\dot q [rad/s]$', Interpreter='latex')
+    L = legend('show', 'Location','best');
+    set(L, 'Interpreter', 'latex')
 
-    end
+
+    figure(3);
+    hold on
+    grid on;
+    plot(t_vect_LP, acc_LP(j,:),'Color', colors1(j,:), ...
+        'DisplayName', sprintf('$q_{%d}$', j), LineWidth=1.5);
+    title('Joint Accelerations (ABC Trajectory)');
+    xlabel('t [s]', Interpreter='latex')
+    ylabel('$\ddot q [rad/s^2]$', Interpreter='latex')
+    L = legend('show', 'Location','best');
+    set(L, 'Interpreter', 'latex')
+
 end
+
+
 
 
 
